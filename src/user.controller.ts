@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { UserProfileDto } from './user.profileDto';
 import { UserService } from './user.service';
@@ -14,9 +15,9 @@ import { UserService } from './user.service';
 export class AppController {
   constructor(private readonly userService: UserService) {}
 
-  @Get(':id')
-  async getUserProfile(@Param('id', ParseIntPipe) id: number) :Promise<UserProfileDto> {
-    const response = await this.userService.getProfileInfo(id);
+  @Get()
+  async getUserProfile(@Query('userId', ParseIntPipe) userId: number) :Promise<UserProfileDto> {
+    const response = await this.userService.getProfileInfo(userId);
 
     const userProfile : UserProfileDto = {
       email: response[0].email,
