@@ -15,8 +15,10 @@ import { UserService } from './user.service';
 export class AppController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  async getUserProfile(@Query('userId', ParseIntPipe) userId: number): Promise<UserProfileDto> {
+  
+  async getUserProfile(@Query('userId', ParseIntPipe) userId: string): Promise<UserProfileDto> {
+    console.log(userId);
+    
     const response = await this.userService.getProfileInfo(userId);
 
     const userProfile : UserProfileDto = {

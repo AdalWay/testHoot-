@@ -17,6 +17,7 @@ export class AppController {
 
   @Get()
   async getUserProfile(@Query('userId', ParseIntPipe) userId: number): Promise<UserProfileDto> {
+    console.log(userId);
     const response = await this.userService.getProfileInfo(userId);
 
     const userProfile : UserProfileDto = {
