@@ -4,27 +4,43 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Param,
   ParseIntPipe,
   Query,
+  Res,
 } from '@nestjs/common';
-import { UserProfileDto } from './user.profileDto';
+import { Response } from 'express';
+import { User } from './user.entity';
 import { UserService } from './user.service';
+
+enum PromiseStatus {
+  Fullfilled = "fulfilled",
+  Rejected = "rejected",
+};
 
 @Controller('users')
 export class AppController {
+  private user: User = {};
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getUserProfile(@Query('userId', ParseIntPipe) userId: number) :Promise<UserProfileDto> {
-    const response = await this.userService.getProfileInfo(userId);
+  async getUserProfile(@Res() res: Response, @Query('userId', ParseIntPipe) userId: number ): Promise<Response<User>>{
+   
+    const response: any = await this.userService.getProfileInfo(userId);
+    
+    const emailResponseStatus = response[0].status;
+    const UrlPictureResponseStatus = response[1].status;
 
-    const userProfile : UserProfileDto = {
-      email: response[0].email,
-      urlPicture: response[1].url,
-    };
-    //NOTE: Nestjs return 200 an implicit 200 if the request is succesfull
-    if ( Object.keys(userProfile).length > 0 ) return userProfile;
-    else throw new HttpException('Theres is an error', HttpStatus.BAD_REQUEST);
+    const isResponseStatusFullfilled: boolean = (emailResponseStatus == PromiseStatus.Fullfilled && UrlPictureResponseStatus == PromiseStatus.Fullfilled) ? true : false;
+
+    if (isResponseStatusFullfilled) {
+      
+      this.user.email = response[0].value.email;
+      this.user.urlPicture =  response[1].value.url;
+
+      return res.status(HttpStatus.OK).json(this.user);
+    }
+    
+
+    else throw new HttpException('Something went wrong... I will figure it out when I wake up.', HttpStatus.BAD_REQUEST);
   }
 }
